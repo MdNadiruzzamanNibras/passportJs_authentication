@@ -4,7 +4,7 @@ const User = require("../models/userModel");
 const handleRegister = async (req, res) => {
   try {
     const user = new User({
-      email: req.body.email,
+      username: req.body.username,
       password: hashSync(req.body.password, 12),
     });
     console.log(user);

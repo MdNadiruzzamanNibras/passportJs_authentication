@@ -3,10 +3,12 @@ require("dotenv").config();
 const cors = require("cors");
 const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
+const MongoStore = require("connect-mongo");
 const userRouter = require("./router/userRouter");
 
 const app = express();
 const session = require("express-session");
+const passport = require("passport");
 const port = 5000;
 
 app.use(cors());
@@ -19,9 +21,17 @@ app.use(
     secret: "keyboard cat",
     resave: false,
     saveUninitialized: true,
-    cookie: { secure: true },
+    store: MongoStore.create({
+      mongoUrl: `mongodb+srv://${process.env.DB_NAME}:${process.env.DB_PASS}@cluster0.ahm0vqb.mongodb.net/passport?retryWrites=true&w=majority&appName=Cluster0`,
+      collectionName: "sessions",
+    }),
+    cookie: {
+      maxAge: 1000 * 60 * 60 * 24,
+    },
   })
 );
+app.use(passport.initialize());
+app.use(passport.session());
 app.use(userRouter);
 
 app.set("view engine", "ejs");
