@@ -2,16 +2,30 @@ const { hashSync } = require("bcrypt");
 const User = require("../models/userModel");
 
 const handleRegister = async (req, res) => {
+  const { username, password, confirPassword } = req.body;
+  if (!username || !password || !confirPassword) {
+    return res.status(404).json("please fill required ");
+  }
+  if (password !== confirPassword) {
+    return res.status(404).json("Password is mismatch");
+  }
   try {
-    const user = new User({
-      username: req.body.username,
-      password: hashSync(req.body.password, 12),
-    });
-    console.log(user);
-    user.save().then((user) => console.log(user));
-    res.send({ success: true, user });
+    const oldUser = await User.findOne({ username });
+
+    if (oldUser) {
+      return res.status(409).json({ error: "User already exists" });
+    } else {
+      const user = new User({
+        username: username,
+        password: hashSync(password, 12),
+      });
+
+      user.save();
+      res.send({ success: true, message: "user sucessfull create" });
+    }
   } catch (error) {
-    console.log(error);
+    console.error(error);
+    res.status(500).json({ message: "Internal Server Error" });
   }
 };
 
